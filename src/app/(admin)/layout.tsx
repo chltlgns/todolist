@@ -43,12 +43,13 @@ export default function AdminLayout({
           return;
         }
 
-        // Check if user is admin
-        // Option 1: Check role in database
-        // Option 2: Check against ADMIN_EMAILS env variable
-        const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",") || [];
-        const isAdminByEmail = adminEmails.includes(userData.email);
+        // Check if user is admin by email
+        const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",").map(e => e.trim()) || [];
+        const userEmail = userData.email?.trim() || "";
+        const isAdminByEmail = adminEmails.includes(userEmail);
         const isAdminByRole = userData.role === "admin";
+
+        console.log("Admin check:", { userEmail, adminEmails, isAdminByEmail, isAdminByRole });
 
         if (!isAdminByEmail && !isAdminByRole) {
           router.push("/");

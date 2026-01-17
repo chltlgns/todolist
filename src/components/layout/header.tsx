@@ -28,8 +28,8 @@ export function Header({ userEmail, coins: initialCoins }: HeaderProps) {
 
   // Check if user is admin based on email
   const isAdmin = useMemo(() => {
-    const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",") || [];
-    return adminEmails.includes(userEmail);
+    const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",").map(e => e.trim()) || [];
+    return adminEmails.includes(userEmail?.trim() || "");
   }, [userEmail]);
 
   useEffect(() => {

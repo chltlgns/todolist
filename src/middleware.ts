@@ -56,8 +56,9 @@ export async function middleware(request: NextRequest) {
 
   // Admin route protection
   if (pathname.startsWith("/admin")) {
-    const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",") || [];
-    if (!adminEmails.includes(user.email || "")) {
+    const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",").map(e => e.trim()) || [];
+    const userEmail = user.email?.trim() || "";
+    if (!adminEmails.includes(userEmail)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }

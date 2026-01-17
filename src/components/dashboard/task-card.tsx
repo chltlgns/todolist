@@ -16,13 +16,6 @@ interface TaskCardProps {
   onEdit?: (todo: Todo) => void;
 }
 
-const priorityColors: Record<string, string> = {
-  URGENT: "border-l-red-500",
-  HIGH: "border-l-orange-500",
-  NORMAL: "border-l-blue-500",
-  LOW: "border-l-gray-500",
-};
-
 // Calculate work hours from start and end time
 const calculateWorkHours = (startTime: Date | string | null, endTime: Date | string | null) => {
   if (!startTime || !endTime) return null;
@@ -37,14 +30,16 @@ export function TaskCard({ todo, onComplete, onDelete, onEdit }: TaskCardProps) 
   const hasTime = todo.startTime && todo.endTime;
   const isCompleted = todo.completed;
   const workHours = calculateWorkHours(todo.startTime, todo.endTime);
+  const categoryColor = todo.category?.color;
 
   return (
     <Card
       className={cn(
-        "relative overflow-hidden border-l-4 transition-all",
-        priorityColors[todo.priority],
+        "relative overflow-hidden transition-all",
+        categoryColor ? "border-l-4" : "",
         isCompleted ? "opacity-60" : "hover:-translate-y-0.5"
       )}
+      style={categoryColor ? { borderLeftColor: categoryColor } : undefined}
     >
       <div className="p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
         <div className="flex-1 flex flex-col gap-2">

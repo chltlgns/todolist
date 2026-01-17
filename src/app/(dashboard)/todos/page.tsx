@@ -50,7 +50,7 @@ export default function TodosPage() {
 
     let query = supabase
       .from("Todo")
-      .select("*")
+      .select("*, category:Category(*)")
       .eq("userId", user.id)
       .order("createdAt", { ascending: false });
 
