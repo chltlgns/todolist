@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -11,6 +11,50 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight, Coins } from "lucide-react";
+
+// 인앱 브라우저 감지 및 외부 브라우저로 이동
+function getInAppBrowserType(): string | null {
+  if (typeof window === "undefined") return null;
+  const ua = navigator.userAgent || navigator.vendor;
+
+  if (/KAKAOTALK/i.test(ua)) return "kakaotalk";
+  if (/Instagram/i.test(ua)) return "instagram";
+  if (/FBAN|FBAV/i.test(ua)) return "facebook";
+  if (/NAVER/i.test(ua)) return "naver";
+  if (/Line/i.test(ua)) return "line";
+  return null;
+}
+
+function openInExternalBrowser(url: string) {
+  const browserType = getInAppBrowserType();
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  if (browserType === "kakaotalk") {
+    // 카카오톡: 외부 브라우저로 열기
+    window.location.href = `kakaotalk://web/openExternal?url=${encodeURIComponent(url)}`;
+    return true;
+  }
+
+  if (browserType === "instagram" || browserType === "facebook") {
+    // 인스타그램/페이스북: Safari나 Chrome으로 열기 시도
+    if (isIOS) {
+      window.location.href = `googlechrome://${url.replace(/https?:\/\//, '')}`;
+      setTimeout(() => {
+        window.location.href = url; // Chrome이 없으면 Safari로 폴백
+      }, 500);
+      return true;
+    }
+  }
+
+  if (isAndroid) {
+    // 안드로이드: Intent로 Chrome 열기
+    window.location.href = `intent://${url.replace(/https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+    return true;
+  }
+
+  return false;
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -46,19 +90,40 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
+    const inAppBrowser = getInAppBrowserType();
+
+    // 인앱 브라우저에서는 외부 브라우저로 이동
+    if (inAppBrowser) {
+      const currentUrl = window.location.href;
+      const opened = openInExternalBrowser(currentUrl);
+
+      if (!opened) {
+        // 외부 브라우저로 열기 실패 시 안내
+        toast.error("인앱 브라우저에서는 Google 로그인이 지원되지 않습니다.", {
+          duration: 5000,
+        });
+        try {
+          await navigator.clipboard.writeText(currentUrl);
+          toast.info("URL이 복사되었습니다. 브라우저에 붙여넣기 해주세요.", {
+            duration: 3000,
+          });
+        } catch {
+          // ignore
+        }
+      }
+      return;
+    }
+
     try {
       const supabase = createClient();
       const redirectUrl = `${window.location.origin}/auth/callback`;
-      console.log("Google OAuth redirect URL:", redirectUrl);
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: redirectUrl,
         },
       });
-
-      console.log("Google OAuth response:", { data, error });
 
       if (error) {
         console.error("Google OAuth error:", error);
