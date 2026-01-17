@@ -4,17 +4,26 @@ import { Reward } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Coins, Lock, ShoppingCart, Loader2 } from "lucide-react";
+import { Coins, Lock, ShoppingCart, Loader2, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RewardCardProps {
   reward: Reward;
   userCoins: number;
   onPurchase: (reward: Reward) => void;
+  onEdit?: (reward: Reward) => void;
+  onDelete?: (reward: Reward) => void;
   isPurchasing?: boolean;
 }
 
-export function RewardCard({ reward, userCoins, onPurchase, isPurchasing = false }: RewardCardProps) {
+export function RewardCard({
+  reward,
+  userCoins,
+  onPurchase,
+  onEdit,
+  onDelete,
+  isPurchasing = false
+}: RewardCardProps) {
   const canAfford = userCoins >= reward.price;
 
   return (
@@ -72,6 +81,38 @@ export function RewardCard({ reward, userCoins, onPurchase, isPurchasing = false
           >
             PREMIUM
           </Badge>
+
+          {/* Edit/Delete Buttons */}
+          {(onEdit || onDelete) && (
+            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              {onEdit && (
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="h-7 w-7 bg-black/50 hover:bg-black/70 border-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(reward);
+                  }}
+                >
+                  <Pencil className="h-3.5 w-3.5 text-white" />
+                </Button>
+              )}
+              {onDelete && (
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="h-7 w-7 bg-black/50 hover:bg-destructive border-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(reward);
+                  }}
+                >
+                  <Trash2 className="h-3.5 w-3.5 text-white" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Info */}

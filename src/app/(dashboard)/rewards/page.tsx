@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/client";
 import { Reward } from "@/types";
 import { RewardCard } from "@/components/rewards/reward-card";
 import { CreateRewardDialog } from "@/components/rewards/create-reward-dialog";
+import { EditRewardDialog } from "@/components/rewards/edit-reward-dialog";
+import { DeleteRewardDialog } from "@/components/rewards/delete-reward-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +24,9 @@ export default function RewardsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<Category>("ALL");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const supabase = createClient();
 
@@ -129,6 +134,16 @@ export default function RewardsPage() {
     } finally {
       setPurchasingId(null);
     }
+  };
+
+  const handleEdit = (reward: Reward) => {
+    setSelectedReward(reward);
+    setEditDialogOpen(true);
+  };
+
+  const handleDelete = (reward: Reward) => {
+    setSelectedReward(reward);
+    setDeleteDialogOpen(true);
   };
 
   const filteredRewards = rewards.filter((reward) => {
@@ -248,6 +263,8 @@ export default function RewardsPage() {
               reward={reward}
               userCoins={userCoins}
               onPurchase={handlePurchase}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
               isPurchasing={purchasingId === reward.id}
             />
           ))
@@ -259,6 +276,22 @@ export default function RewardsPage() {
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
         onRewardCreated={fetchRewards}
+      />
+
+      {/* Edit Reward Dialog */}
+      <EditRewardDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        reward={selectedReward}
+        onRewardUpdated={fetchRewards}
+      />
+
+      {/* Delete Reward Dialog */}
+      <DeleteRewardDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        reward={selectedReward}
+        onRewardDeleted={fetchRewards}
       />
     </div>
   );
