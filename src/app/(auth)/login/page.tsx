@@ -48,17 +48,24 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithOAuth({
+      const redirectUrl = `${window.location.origin}/auth/callback`;
+      console.log("Google OAuth redirect URL:", redirectUrl);
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
         },
       });
 
+      console.log("Google OAuth response:", { data, error });
+
       if (error) {
+        console.error("Google OAuth error:", error);
         toast.error(error.message);
       }
-    } catch {
+    } catch (err) {
+      console.error("Google login exception:", err);
       toast.error("Google 로그인 중 오류가 발생했습니다.");
     }
   };
