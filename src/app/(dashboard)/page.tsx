@@ -19,6 +19,7 @@ const MONTH_LABELS = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8
 export default function DashboardPage() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [todayWorkHours, setTodayWorkHours] = useState(0);
   const [todayCompletedTasks, setTodayCompletedTasks] = useState(0);
   const [weeklyWorkHours, setWeeklyWorkHours] = useState(0);
   const [monthlyWorkHours, setMonthlyWorkHours] = useState(0);
